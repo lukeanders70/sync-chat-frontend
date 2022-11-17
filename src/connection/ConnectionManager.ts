@@ -58,7 +58,7 @@ export class ConnectionManager
                 let valid = ValidateConnectedMessage(connectedMessage)
                 if(valid) {
                     let ActivateMessage = CreateActivateMessage(connectedMessage.connectionId, this.clientName)
-                    this.SendMessage(message, false);
+                    this.SendMessage(ActivateMessage, false);
                 }
                 break;
             } case "active-response" : {
