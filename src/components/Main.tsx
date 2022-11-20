@@ -1,15 +1,23 @@
 import React, { Component, useState } from 'react'
 
-interface MainProps {
+type MainProps = {
+    name: string
+}
+type MainState = {
 }
 
-function Main(props: MainProps) {
+class Main extends React.Component<MainProps, MainState> {
+    state = {
+        name: ""
+    }
 
-    return (
-        <div id="mainContainer">
-            <h1>Main Container</h1>
-        </div>
-    )
+    render(){
+        return (
+            <div id="mainContainer">
+                <h1>{this.props.name}</h1>
+            </div>
+        )
+    }
 }
 
 export default Main
