@@ -6,6 +6,7 @@ import Stylesheet from './Stylesheet'
 type AppProps = {
 
 }
+
 type AppState = {
     name: string, // name of the user
 }
