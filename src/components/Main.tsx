@@ -1,5 +1,5 @@
 import React from 'react'
-import { ConnectionManager, ConnectionStatus } from '../connection/ConnectionManager';
+import { GetConnectionManager, ConnectionManager, ConnectionStatus } from '../connection/ConnectionManager';
 
 type MainProps = {
     name: string
@@ -18,12 +18,13 @@ class Main extends React.Component<MainProps, MainState> {
 
     constructor(props: MainProps){
         super(props);
-        this.connectionManager = new ConnectionManager("localhost", "8999", props.name)
+        this.connectionManager = GetConnectionManager("localhost", "8999", props.name)
+        this.connectionManager.SetConnectionStatusChangedHandler(this.handleConnectionStatusChanged)
 
         this.state.connectionStatus = this.connectionManager.connectionStatus
     }
 
-    handleConnectionStatusChanged(newStatus: ConnectionStatus){
+    handleConnectionStatusChanged = (newStatus: ConnectionStatus) => {
         this.setState({ connectionStatus: newStatus })
     }
 

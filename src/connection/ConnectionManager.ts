@@ -8,6 +8,15 @@ export enum ConnectionStatus {
     Active,
 }
 
+var connectionManagerInstance : ConnectionManager
+
+export function GetConnectionManager(host : string, port : string, clientName: string) {
+    if(connectionManagerInstance === undefined) {
+        connectionManagerInstance = new ConnectionManager(host, port, clientName)
+    }
+    return connectionManagerInstance
+} 
+
 export class ConnectionManager 
 {
     private connection : WebSocket
