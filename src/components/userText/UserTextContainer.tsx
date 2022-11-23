@@ -1,15 +1,26 @@
 import React, { Component, useState } from 'react'
 
-interface UserTextContainerProps {
+type UserTextContainerProps = {
     userName: string
 }
 
-function UserTextContainer(props: UserTextContainerProps) {
-    return (
-        <div className="userTextContainer">
-            <h1>{props.userName}</h1>
-        </div>
-    )
+type UserTextContainerState = {
+    text: string
+}
+
+class UserTextContainer extends React.Component<UserTextContainerProps, UserTextContainerState> {
+    state: UserTextContainerState = {
+        text: ''
+    }
+
+    render() {
+        return (
+            <div className="userTextContainer">
+                <h1>{this.props.userName}</h1>
+                <p>{this.state.text}</p>
+            </div>
+        )
+    }
 }
 
 export default UserTextContainer
