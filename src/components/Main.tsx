@@ -1,5 +1,6 @@
 import React from 'react'
 import { GetConnectionManager, ConnectionManager, ConnectionStatus } from '../connection/ConnectionManager';
+import UserTextContainer from './userText/UserTextContainer';
 
 type MainProps = {
     name: string
@@ -31,7 +32,7 @@ class Main extends React.Component<MainProps, MainState> {
     render(){
         return (
             <div id="mainContainer">
-                <h1>{this.props.name} : {this.state.connectionStatus}</h1>
+                <UserTextContainer userName={this.props.name}/>
             </div>
         )
     }
