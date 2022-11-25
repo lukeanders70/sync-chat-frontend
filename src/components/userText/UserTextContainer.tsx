@@ -13,6 +13,10 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
         text: ''
     }
 
+    public AddLetter = () => {
+        
+    }
+
     render() {
         return (
             <div className="userTextContainer">

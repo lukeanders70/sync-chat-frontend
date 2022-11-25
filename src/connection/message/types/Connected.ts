@@ -1,7 +1,6 @@
 import { BaseMessage } from "../types/Base"
 
 export interface ConnectedMessage extends BaseMessage{
-    // letter
     connectionId: string
 }
 

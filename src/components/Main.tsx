@@ -1,5 +1,6 @@
 import React from 'react'
 import { GetConnectionManager, ConnectionManager, ConnectionStatus } from '../connection/ConnectionManager';
+import { AddLetterMessage } from '../connection/message/types/AddLetter';
 import UserTextContainer from './userText/UserTextContainer';
 
 type MainProps = {
@@ -8,11 +9,13 @@ type MainProps = {
 
 type MainState = {
     connectionStatus: ConnectionStatus
+    connectionNames: string[]
 }
 
 class Main extends React.Component<MainProps, MainState> {
     state: MainState = {
-        connectionStatus: ConnectionStatus.Unconnected
+        connectionStatus: ConnectionStatus.Unconnected,
+        connectionNames: []
     }
 
     connectionManager : ConnectionManager;

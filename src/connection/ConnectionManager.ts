@@ -1,6 +1,10 @@
 import { ActivateResponseMessage, CreateActivateMessage, ValidateActivateResponseMessage } from "./message/types/Activate";
-import { BaseMessage, ValidateBaseMessage } from "./message/types/Base";
-import { ConnectedMessage, ValidateConnectedMessage } from "./message/types/Connected";
+import { ActiveClientListResponseMessage, ValidateActiveClientListResponseMessage } from "./message/types/ActiveClientList";
+import { BaseMessage } from "./message/types/Base";
+import { ConnectedMessage  } from "./message/types/Connected";
+import { NewClientMessage } from "./message/types/NewClient";
+import { RemoveClientMessage } from "./message/types/RemoveClient";
+import { MessageHandler } from "./MessageHandler";
 
 export enum ConnectionStatus {
     Unconnected,
@@ -19,86 +23,108 @@ export function GetConnectionManager(host : string, port : string, clientName: s
 
 export class ConnectionManager 
 {
+    public connectionStatus : ConnectionStatus
+    public messageHandler : MessageHandler
+
     private connection : WebSocket
     private clientName : string
-    public connectionStatus : ConnectionStatus
+    private otherClients : Set<string>
+    
     private ConnectionStatusChangedHandler? : (newStatus: ConnectionStatus) => void
+    private OnOtherClientsChangedHandler? : (newClientsList: Set<string>) => void
 
     constructor(host : string, port : string, clientName : string) {
 
-        console.log("constructing connection manager")
         const connectionString = "ws://" + host + ":" + port
 
         this.connection = new WebSocket(connectionString)
         this.connectionStatus = ConnectionStatus.Unconnected
         this.clientName = clientName
+        this.otherClients = new Set<string>()
+        this.messageHandler = new MessageHandler()
 
         this.SetMessageListeners()
     }
 
-    private SetMessageListeners() {
-        this.connection.onopen = this.HandleOpen.bind(this)
-        this.connection.onmessage = this.HandleMessage.bind(this)
-        this.connection.onerror = this.HandleError.bind(this)
-        this.connection.onclose = this.HandleClose.bind(this)
-    }
+    ///////////////////
+    // Base Handlers //
+    ///////////////////
 
     private HandleOpen(event: Event) {
         console.log("Connection Open")
     }
+    
 
     private HandleMessage(event: MessageEvent) {
-        let eventData = event.data.toString()
-        let eventDataParsed: BaseMessage = JSON.parse(eventData);
-        let valid = ValidateBaseMessage(eventDataParsed)
-        
-        if(valid) {
-            if(this.connectionStatus === ConnectionStatus.Active) {
-                this.HandleActiveMessage(eventDataParsed, eventData)
-            } else {
-                this.HandleInActivateMessage(eventDataParsed, eventData)
-            }
+        const eventData: string = event.data.toString()
+        this.messageHandler.HandleMessage(eventData)
+    }
+
+    private HandleError(event: Event) {
+        console.error("Error on websocket " + event)
+    }
+
+    private HandleClose(event: CloseEvent) {
+        this.RemoveActiveListeners();
+        this.SetConnectionStatus(ConnectionStatus.Unconnected)
+    }
+
+    //////////////////////
+    // Message Handlers //
+    /////////////////////
+
+    private OnConnected(message : ConnectedMessage) {
+
+        if(this.connectionStatus !== ConnectionStatus.Unconnected) {
+            console.error("got connection message when status was not Unconnected")
+            return;
+        }
+        this.SetConnectionStatus(ConnectionStatus.Connected)
+
+        let ActivateMessage = CreateActivateMessage(message.connectionId, this.clientName)
+        this.SendMessage(ActivateMessage, false);
+    }
+
+    private OnActivated(message : ActivateResponseMessage) {
+        if(this.connectionStatus !== ConnectionStatus.Connected) {
+            console.error("Got an activate message when connection status was not Connected")
+            return;
+        }
+        if(message.success) {
+            this.SetConnectionStatus(ConnectionStatus.Active)
+            this.SetActivatedListeners()
         } else {
-            console.error("Received Message that was not valid Base Message")
+            console.error("Failed to Activate Connection")
         }
     }
 
-    private HandleInActivateMessage(message: BaseMessage, messageString: string) {
-        switch(message.type) {
-            case "connected" : {
-                let connectedMessage: ConnectedMessage = JSON.parse(messageString)
-                let valid = ValidateConnectedMessage(connectedMessage)
-                if(valid) {
-                    if(this.ConnectionStatusChangedHandler !== undefined) {
-                        this.ConnectionStatusChangedHandler(this.connectionStatus);
-                    }
-                    this.connectionStatus = ConnectionStatus.Connected
-                    let ActivateMessage = CreateActivateMessage(connectedMessage.connectionId, this.clientName)
-                    this.SendMessage(ActivateMessage, false);
-                }
-                break;
-            } case "active-response" : {
-                let activateResponseMessage: ActivateResponseMessage = JSON.parse(messageString)
-                let valid = ValidateActivateResponseMessage(activateResponseMessage)
-                if(valid) {
-                    if(activateResponseMessage.success){
-                        this.SetActive()
-                    } else {
-                        console.error("unable to activate connection!")
-                    }
-                } else {
-                    console.error("activate response message was not valid")
-                }
-                break;
-            } default : {
-                console.warn("Received unrecognized message for inactive connection : " + message.type)
-            }
+    private OnActiveClientList(message: ActiveClientListResponseMessage) {
+        message.clientNames.forEach(clientName => {
+            this.otherClients.add(clientName)
+        });
+
+        if(this.OnOtherClientsChangedHandler !== undefined) {
+            this.OnOtherClientsChangedHandler(this.otherClients)
         }
     }
 
-    private HandleActiveMessage(message: BaseMessage, messageString: string) {
-
+    private OnNewClient(message: NewClientMessage) {
+        this.otherClients.add(message.clientName)
+        if(this.OnOtherClientsChangedHandler !== undefined) {
+            this.OnOtherClientsChangedHandler(this.otherClients)
+        }
     }
+
+    private OnRemoveClient(message: RemoveClientMessage) {
+        this.otherClients.delete(message.clientName)
+        if(this.OnOtherClientsChangedHandler !== undefined) {
+            this.OnOtherClientsChangedHandler(this.otherClients)
+        }
+    }
+
+    ////////////////////
+    // Public Methods //
+    ////////////////////
 
     public SendMessage(message : BaseMessage, forceActive : boolean = true) {
         if(!forceActive || this.connectionStatus === ConnectionStatus.Active) {
@@ -109,6 +135,7 @@ export class ConnectionManager
         }
     }
 
+    // TODO: Make delegate helper and move that use that
     public SetConnectionStatusChangedHandler(newHandler: (newStatus: ConnectionStatus) => void){
         if(this.ConnectionStatusChangedHandler !== undefined) {
             console.warn("Setting connnection status handler over existing handler")
@@ -116,27 +143,56 @@ export class ConnectionManager
         this.ConnectionStatusChangedHandler = newHandler;
     }
 
-    public RemoveConnectionStatusChangedHandelr(){
+    // TODO: make delegate helper and move to use that
+    public RemoveConnectionStatusChangedHandler(){
         this.ConnectionStatusChangedHandler = undefined
     }
 
-    private SetActive() {
-        this.connectionStatus = ConnectionStatus.Active
+    /////////////////////
+    // Private Helpers //
+    /////////////////////
+    
+    /**
+     * Sets the internal state of conneciton status and fires delgate if required
+     */
+    private SetConnectionStatus(newStatus: ConnectionStatus) {
+        this.connectionStatus = newStatus
+        console.log("Connection Status Updated to Status: " + this.connectionStatus)
         if(this.ConnectionStatusChangedHandler !== undefined) {
-            this.ConnectionStatusChangedHandler(this.connectionStatus);
+            this.ConnectionStatusChangedHandler(this.connectionStatus)
         }
-        console.log("Connection Active")
     }
 
-    private HandleError(event: Event) {
-        console.error("Error on websocket " + event)
+    /**
+     * Sets listeners that are always active on this connection
+     */
+    private SetMessageListeners() {
+        this.connection.onopen = this.HandleOpen.bind(this)
+        this.connection.onmessage = this.HandleMessage.bind(this)
+        this.connection.onerror = this.HandleError.bind(this)
+        this.connection.onclose = this.HandleClose.bind(this)
+
+        this.messageHandler.ConnectedDelegate.AddHandler(this, this.OnConnected.bind(this))
+        this.messageHandler.ActiveResponseDelegate.AddHandler(this, this.OnActivated.bind(this))
     }
 
-    private HandleClose(event: CloseEvent) {
-        this.connectionStatus = ConnectionStatus.Unconnected
-        if(this.ConnectionStatusChangedHandler !== undefined) {
-            this.ConnectionStatusChangedHandler(this.connectionStatus);
-        }
-        console.log("Connection Closed")
+    /**
+     * Sets Listeners that are only active when the connection is activated
+     */
+    private SetActivatedListeners() {
+        this.RemoveActiveListeners()
+
+        this.messageHandler.ActiveClientListResponseDelegate.AddHandler(this, this.OnActiveClientList.bind(this))
+        this.messageHandler.NewClientDelegate.AddHandler(this, this.OnNewClient.bind(this))
+        this.messageHandler.RemoveClientDelegate.AddHandler(this, this.OnRemoveClient.bind(this))
+    }
+
+    /**
+     * Removes all message delegates bound with this connection manager
+     */
+    private RemoveActiveListeners() {
+        this.messageHandler.ActiveClientListResponseDelegate.ClearObjectHandlers(this)
+        this.messageHandler.NewClientDelegate.ClearObjectHandlers(this)
+        this.messageHandler.RemoveClientDelegate.ClearObjectHandlers(this)
     }
 }
