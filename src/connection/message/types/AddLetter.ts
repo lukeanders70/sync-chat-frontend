@@ -5,6 +5,13 @@ export interface AddLetterMessage extends BaseMessage {
     l: string //letter
 }
 
+export function CreateAddLetterMessage(letter : string) {
+    const letterMessage : AddLetterMessage = {
+        type: "add-letter",
+        l: letter
+    }
+    return letterMessage
+}
 
 export function ValidateAddLetterMessage(message: AddLetterMessage) {
     return message.l != undefined && message.l.length == 1
