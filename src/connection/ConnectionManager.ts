@@ -1,5 +1,5 @@
-import { ActivateResponseMessage, CreateActivateMessage, ValidateActivateResponseMessage } from "./message/types/Activate";
-import { ActiveClientListResponseMessage, ValidateActiveClientListResponseMessage } from "./message/types/ActiveClientList";
+import { ActivateResponseMessage, CreateActivateMessage } from "./message/types/Activate";
+import { ActiveClientListResponseMessage, CreateActivateClientListMessage } from "./message/types/ActiveClientList";
 import { BaseMessage } from "./message/types/Base";
 import { ConnectedMessage  } from "./message/types/Connected";
 import { NewClientMessage } from "./message/types/NewClient";
@@ -31,7 +31,7 @@ export class ConnectionManager
     private otherClients : Set<string>
     
     private ConnectionStatusChangedHandler? : (newStatus: ConnectionStatus) => void
-    private OnOtherClientsChangedHandler? : (newClientsList: Set<string>) => void
+    private OtherClientsChangedHandler? : (newClientsList: Set<string>) => void
 
     constructor(host : string, port : string, clientName : string) {
 
@@ -93,6 +93,10 @@ export class ConnectionManager
         if(message.success) {
             this.SetConnectionStatus(ConnectionStatus.Active)
             this.SetActivatedListeners()
+
+            // get latest list of currently connected clients
+            const activeClientListMessage = CreateActivateClientListMessage(this.clientName)
+            this.SendMessage(activeClientListMessage)
         } else {
             console.error("Failed to Activate Connection")
         }
@@ -103,22 +107,23 @@ export class ConnectionManager
             this.otherClients.add(clientName)
         });
 
-        if(this.OnOtherClientsChangedHandler !== undefined) {
-            this.OnOtherClientsChangedHandler(this.otherClients)
+        if(this.OtherClientsChangedHandler !== undefined) {
+            this.OtherClientsChangedHandler(this.otherClients)
         }
     }
 
     private OnNewClient(message: NewClientMessage) {
+        console.log("OnNewClient")
         this.otherClients.add(message.clientName)
-        if(this.OnOtherClientsChangedHandler !== undefined) {
-            this.OnOtherClientsChangedHandler(this.otherClients)
+        if(this.OtherClientsChangedHandler !== undefined) {
+            this.OtherClientsChangedHandler(this.otherClients)
         }
     }
 
     private OnRemoveClient(message: RemoveClientMessage) {
         this.otherClients.delete(message.clientName)
-        if(this.OnOtherClientsChangedHandler !== undefined) {
-            this.OnOtherClientsChangedHandler(this.otherClients)
+        if(this.OtherClientsChangedHandler !== undefined) {
+            this.OtherClientsChangedHandler(this.otherClients)
         }
     }
 
@@ -146,6 +151,17 @@ export class ConnectionManager
     // TODO: make delegate helper and move to use that
     public RemoveConnectionStatusChangedHandler(){
         this.ConnectionStatusChangedHandler = undefined
+    }
+
+    public SetOtherClientConnectionChangedHandler(newHandler: (newClients: Set<string>) => void) {
+        if(this.OtherClientsChangedHandler !== undefined) {
+            console.warn("Seeting on other clients changed handler over existing handler")
+        }
+        this.OtherClientsChangedHandler = newHandler
+    }
+
+    public RemoveOtherClientConnectionChangedHandler() {
+        this.OtherClientsChangedHandler = undefined;
     }
 
     /////////////////////

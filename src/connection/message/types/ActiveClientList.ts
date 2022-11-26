@@ -6,7 +6,7 @@ export interface ActiveClientListMessage extends BaseMessage{
 
 export function CreateActivateClientListMessage(clientName: string) : ActiveClientListMessage  {
     let activateClientListMessage : ActiveClientListMessage = {
-        type: "activate-client-list",
+        type: "active-client-list",
         clientName: clientName
     }
     return activateClientListMessage
