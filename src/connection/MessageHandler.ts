@@ -51,7 +51,7 @@ export class MessageHandler {
                 this.ConnectedDelegate.Handle(messageString)
                 break;
             } 
-            case "active-response" : {
+            case "activate-response" : {
                 this.ActiveResponseDelegate.Handle(messageString)
                 break;
             }
@@ -59,7 +59,7 @@ export class MessageHandler {
                 this.ActiveClientListResponseDelegate.Handle(messageString)
                 break;
             }
-            case "new-client-connected" : {
+            case "new-client" : {
                 this.NewClientDelegate.Handle(messageString)
                 break;
             }
