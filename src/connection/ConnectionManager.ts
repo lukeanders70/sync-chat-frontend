@@ -14,12 +14,16 @@ export enum ConnectionStatus {
 
 var connectionManagerInstance : ConnectionManager
 
-export function GetConnectionManager(host : string, port : string, clientName: string) {
+export function GetOrCreateConnectionManager(host : string, port : string, clientName: string) {
     if(connectionManagerInstance === undefined) {
         connectionManagerInstance = new ConnectionManager(host, port, clientName)
     }
     return connectionManagerInstance
-} 
+}
+
+export function GetConnectionManager() {
+    return connectionManagerInstance
+}
 
 export class ConnectionManager 
 {

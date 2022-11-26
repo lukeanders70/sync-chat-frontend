@@ -1,6 +1,6 @@
 import { ActivateResponseMessage } from "./message/types/Activate";
 import { ActiveClientListResponseMessage } from "./message/types/ActiveClientList";
-import { AddLetterMessage, ValidateAddLetterMessage } from "./message/types/AddLetter";
+import { AddLetterMessage, NewLetterMessage, ValidateAddLetterMessage } from "./message/types/AddLetter";
 import { BaseMessage, ValidateBaseMessage } from "./message/types/Base";
 import { ConnectedMessage } from "./message/types/Connected";
 import { NewClientMessage } from "./message/types/NewClient";
@@ -71,6 +71,9 @@ export class MessageHandler {
                 this.AddLetterDelegate.Handle(messageString)
                 break;
             }
+            case("new-letter") : {
+                this.NewLetterDelegate.Handle(messageString)
+            }
         }
     }
 
@@ -81,4 +84,5 @@ export class MessageHandler {
     public NewClientDelegate: MessageDelegate<NewClientMessage> = new MessageDelegate<NewClientMessage>()
     public RemoveClientDelegate: MessageDelegate<RemoveClientMessage> = new MessageDelegate<RemoveClientMessage>()
     public AddLetterDelegate: MessageDelegate<AddLetterMessage> = new MessageDelegate<AddLetterMessage>()
+    public NewLetterDelegate: MessageDelegate<NewLetterMessage> = new MessageDelegate<NewLetterMessage>()
 }
