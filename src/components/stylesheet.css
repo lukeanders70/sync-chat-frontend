@@ -17,3 +17,19 @@
     border: 1px solid #888;
     width: 80%; /* Could be more or less, depending on screen size */
 }
+
+.userTextContainer {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid gainsboro
+}
+
+.userName {
+    font-family: roboto;
+    font-weight: bold;
+}
+
+.userText {
+    font-family: roboto;
+    text-align: right;
+}
