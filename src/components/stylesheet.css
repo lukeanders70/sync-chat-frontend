@@ -27,6 +27,7 @@
 .userName {
     font-family: roboto;
     font-weight: bold;
+    text-align: right;
 }
 
 .userText {
