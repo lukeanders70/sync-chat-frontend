@@ -120,8 +120,10 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
     render() {
         return (
             <div className="userTextContainer">
-                <div className='userName'>{this.props.userName}</div>
-                <p className="userText">{this.state.text}</p>
+                <div className="userTextInnerContainer">
+                    <div className='userName'>{this.props.userName}</div>
+                    <p className="userText">{this.state.text}</p>
+                </div>
                 {this.props.primaryClient ? <input type="text" maxLength={1} onChange={this.handleOnTextInputChange}/> : <div />}
             </div>
         )
