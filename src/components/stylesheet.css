@@ -21,11 +21,17 @@
 .userTextContainer {
     padding: 10px;
     border-radius: 5px;
-    border: 1px solid gainsboro
+    border: 1px solid gainsboro;
+    display: flex;
 }
 
 .userTextInnerContainer {
     width: 80%;
+}
+
+.userTextInnerInputContainer {
+    flex: 1;
+    float: right;
 }
 
 .userName {
@@ -37,5 +43,11 @@
 .userText {
     font-family: roboto;
     text-align: right;
-    margin: 0px
+    margin: 0px;
+    white-space: pre;
+}
+
+#primaryTextInput{
+    width: 10px;
+    opacity: 0;
 }

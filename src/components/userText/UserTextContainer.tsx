@@ -1,5 +1,5 @@
 import { timeStamp } from 'console'
-import React, { ChangeEvent, Component, useState } from 'react'
+import React, { ChangeEvent, Component, ReactElement, useState } from 'react'
 import { ConnectionManager, GetConnectionManager } from '../../connection/ConnectionManager'
 import { AddLetterMessage, CreateAddLetterMessage, NewLetterMessage } from '../../connection/message/types/AddLetter'
 
@@ -33,11 +33,15 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
     // the current timer that is waiting to erase the last letter. Is reassigned when letter is erased
     letterEraseTimer: number = 0
 
+    inputElement: React.RefObject<HTMLInputElement>;
+
     constructor(props: UserTextContainerProps){
         super(props);
 
         this.connectionManager = GetConnectionManager()
         this.letters = []
+
+        this.inputElement = React.createRef();
     }
 
     componentDidMount(): void {
@@ -117,14 +121,20 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
         }
     }
 
+    setTypeActive = () => {
+        if (this.inputElement.current) this.inputElement.current.focus();
+    }
+
     render() {
         return (
-            <div className="userTextContainer">
+            <div className="userTextContainer" onClick={this.setTypeActive}>
                 <div className="userTextInnerContainer">
                     <div className='userName'>{this.props.userName}</div>
-                    <p className="userText">{this.state.text}</p>
+                    <p className="userText">{this.state.text == "" ? " " : this.state.text}</p>
                 </div>
-                {this.props.primaryClient ? <input type="text" maxLength={1} onChange={this.handleOnTextInputChange}/> : <div />}
+                <div className='userTextInnerInputContainer'>
+                    {this.props.primaryClient ? <input id="primaryTextInput" type="text" ref={this.inputElement} maxLength={1} onChange={this.handleOnTextInputChange}/> : <div />}
+                </div>
             </div>
         )
     }
