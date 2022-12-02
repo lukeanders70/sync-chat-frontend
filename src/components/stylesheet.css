@@ -20,13 +20,34 @@
 
 .userTextContainer {
     padding: 10px;
-    border-radius: 5px;
-    border: 1px solid gainsboro;
+    border-bottom: 1px solid gainsboro;
     display: flex;
+}
+
+.userTextContainer.primary:hover {
+    background-color: rgb(245, 245, 245);
+    cursor: text;
+}
+
+.userTextContainer.primary:active {
+    background-color: rgb(237, 237, 237);
+}
+
+.userTextContainer.secondary:hover {
+    background-color: rgb(252, 252, 252);
 }
 
 .userTextInnerContainer {
     width: 80%;
+}
+
+.userTextInnerDivider {
+    background-color: rgb(71, 227, 71);
+    width: 2px;
+}
+
+.userTextInnerDivider.primary {
+    background-color: black;
 }
 
 .userTextInnerInputContainer {
@@ -38,6 +59,19 @@
     font-family: roboto;
     font-weight: bold;
     text-align: right;
+}
+
+.userNameInnerContainer {
+    background-color: rgb(71, 227, 71);
+    display: inline;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 3px 0px 0px 3px;
+}
+
+.userNameInnerContainer.primary {
+    background-color: black;
+    color: white;
 }
 
 .userText {

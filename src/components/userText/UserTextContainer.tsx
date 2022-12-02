@@ -2,6 +2,7 @@ import { timeStamp } from 'console'
 import React, { ChangeEvent, Component, ReactElement, useState } from 'react'
 import { ConnectionManager, GetConnectionManager } from '../../connection/ConnectionManager'
 import { AddLetterMessage, CreateAddLetterMessage, NewLetterMessage } from '../../connection/message/types/AddLetter'
+import UserNameContainer from './UserNameContainer'
 
 type UserTextContainerProps = {
     primaryClient: boolean
@@ -125,13 +126,27 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
         if (this.inputElement.current) this.inputElement.current.focus();
     }
 
+    getUserTextClasses = () : string => {
+        var userTextContainerClasses: string = "userTextContainer "
+        userTextContainerClasses += this.props.primaryClient ? "primary" : "secondary"
+        return userTextContainerClasses
+    }
+
+    getUserTextInnerDividerClasses = () : string => {
+        var userTextContainerClasses: string = "userTextInnerDivider "
+        userTextContainerClasses += this.props.primaryClient ? "primary" : "secondary"
+        return userTextContainerClasses
+    }
+
     render() {
+
         return (
-            <div className="userTextContainer" onClick={this.setTypeActive}>
+            <div className={this.getUserTextClasses()} onClick={this.setTypeActive}>
                 <div className="userTextInnerContainer">
-                    <div className='userName'>{this.props.userName}</div>
+                    < UserNameContainer userName={this.props.userName} primaryClient={this.props.primaryClient}/>
                     <p className="userText">{this.state.text == "" ? " " : this.state.text}</p>
                 </div>
+                <div className={this.getUserTextInnerDividerClasses()}></div>
                 <div className='userTextInnerInputContainer'>
                     {this.props.primaryClient ? <input id="primaryTextInput" type="text" ref={this.inputElement} maxLength={1} onChange={this.handleOnTextInputChange}/> : <div />}
                 </div>
