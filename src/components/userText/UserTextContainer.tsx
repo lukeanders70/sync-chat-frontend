@@ -3,6 +3,7 @@ import React, { ChangeEvent, Component, ReactElement, useState } from 'react'
 import { ConnectionManager, GetConnectionManager } from '../../connection/ConnectionManager'
 import { AddLetterMessage, CreateAddLetterMessage, NewLetterMessage } from '../../connection/message/types/AddLetter'
 import UserNameContainer from './UserNameContainer'
+import UserTextCursor from './UserTextCursor'
 
 type UserTextContainerProps = {
     primaryClient: boolean
@@ -10,7 +11,8 @@ type UserTextContainerProps = {
 }
 
 type UserTextContainerState = {
-    text: string
+    text: string,
+    active: boolean
 }
 
 type TimedLetter = {
@@ -22,7 +24,8 @@ const LetterLifespanMs : number = 5000
 
 class UserTextContainer extends React.Component<UserTextContainerProps, UserTextContainerState> {
     state: UserTextContainerState = {
-        text: ''
+        text: '',
+        active: false
     }
 
     // pointer to the global connection manager
@@ -108,7 +111,7 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
 
     setFirstLetterTimer = () => {
         if(this.letterEraseTimer !== 0) {
-            console.warn("tried to set a letter time, but one is alreayd active")
+            console.warn("tried to set a letter time, but one is already active")
             return
         }
         if(this.letters.length > 0) {
@@ -124,6 +127,14 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
 
     setTypeActive = () => {
         if (this.inputElement.current) this.inputElement.current.focus();
+    }
+
+    onTypeActive = () => {
+        this.setState({active : true})
+    }
+
+    onTypeInactive = () => {
+        this.setState({active : false})
     }
 
     getUserTextClasses = () : string => {
@@ -146,9 +157,20 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
                     < UserNameContainer userName={this.props.userName} primaryClient={this.props.primaryClient}/>
                     <p className="userText">{this.state.text == "" ? " " : this.state.text}</p>
                 </div>
-                <div className={this.getUserTextInnerDividerClasses()}></div>
+                < UserTextCursor active={this.state.active} primaryClient={this.props.primaryClient} />
                 <div className='userTextInnerInputContainer'>
-                    {this.props.primaryClient ? <input id="primaryTextInput" type="text" ref={this.inputElement} maxLength={1} onChange={this.handleOnTextInputChange}/> : <div />}
+                    {this.props.primaryClient ? 
+                        <input 
+                            id="primaryTextInput"
+                            type="text"
+                            ref={this.inputElement}
+                            maxLength={1}
+                            onChange={this.handleOnTextInputChange}
+                            onFocus={this.onTypeActive}
+                            onBlur={this.onTypeInactive}
+                        /> : 
+                        <div />
+                    }
                 </div>
             </div>
         )

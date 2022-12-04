@@ -50,6 +50,10 @@
     background-color: black;
 }
 
+.userTextInnerDivider.primary.active {
+    height: 3ex;
+}
+
 .userTextInnerInputContainer {
     flex: 1;
     float: right;
@@ -79,6 +83,8 @@
     text-align: right;
     margin: 0px;
     white-space: pre;
+    overflow: clip;
+    text-indent: -9999px;
 }
 
 #primaryTextInput{

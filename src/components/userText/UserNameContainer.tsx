@@ -8,8 +8,6 @@ type UserNameContainerProps = {
 type UserNameContainerState = {
 }
 
-const LetterLifespanMs : number = 5000
-
 class UserNameContainer extends React.Component<UserNameContainerProps, UserNameContainerState> {
     state: UserNameContainerState = {}
 
