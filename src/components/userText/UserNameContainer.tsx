@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Component, ReactElement, useState } from 'react'
+import React from 'react'
 
 type UserNameContainerProps = {
     primaryClient: boolean
@@ -10,10 +10,6 @@ type UserNameContainerState = {
 
 class UserNameContainer extends React.Component<UserNameContainerProps, UserNameContainerState> {
     state: UserNameContainerState = {}
-
-    constructor(props: UserNameContainerProps){
-        super(props);
-    }
 
     getUserNameInnerClasses = () : string => {
         var userNameContainerClasses: string = "userNameInnerContainer "

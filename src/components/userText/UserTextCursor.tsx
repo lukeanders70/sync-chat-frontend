@@ -33,7 +33,7 @@ class UserTextCursor extends React.Component<UserTextCursorProps, UserTextCursor
     }
 
     isCursorBlinking = (): boolean => {
-        return this.blinkTimer != 0
+        return this.blinkTimer !== 0
     }
 
     toggleVisibility = (): void => {
@@ -41,24 +41,16 @@ class UserTextCursor extends React.Component<UserTextCursorProps, UserTextCursor
     }
 
     conditionallySetCursorTimer = (): void => {
-        console.log("conditionallySetCursorTimer")
         if(this.shouldCursorBlink()) {
-            console.log("should blink")
             if(!this.isCursorBlinking()) {
-                console.log("is not blinking")
                 this.setState({ visible: true })
                 this.blinkTimer = window.setInterval(this.toggleVisibility, BlinkTimeMs)
             }
-            console.log("is bliking")
         } else {
-            console.log("should not blink")
             window.clearInterval(this.blinkTimer)
             this.blinkTimer = 0;
             if(!this.state.visible) {
-                console.log("is not visible")
                 this.setState({ visible: true })
-            } else {
-                console.log("is visibl")
             }
         }
     }

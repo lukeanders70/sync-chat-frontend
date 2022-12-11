@@ -1,7 +1,6 @@
-import { timeStamp } from 'console'
-import React, { ChangeEvent, Component, ReactElement, useState } from 'react'
+import React, { ChangeEvent } from 'react'
 import { ConnectionManager, GetConnectionManager } from '../../connection/ConnectionManager'
-import { AddLetterMessage, CreateAddLetterMessage, NewLetterMessage } from '../../connection/message/types/AddLetter'
+import { CreateAddLetterMessage, NewLetterMessage } from '../../connection/message/types/AddLetter'
 import UserNameContainer from './UserNameContainer'
 import UserTextCursor from './UserTextCursor'
 
@@ -72,7 +71,7 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
     }
 
     addLetterToEnd = (newLetter: string) => {
-        if(newLetter.length != 1) {
+        if(newLetter.length !== 1) {
             console.error("Can only add single letters, not longer strings")
             return
         }
@@ -81,17 +80,24 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
             return
         }
 
-        //TODO: add mutex so this is thread safe
-        this.letters.push({
-            letter: newLetter,
-            time: Date.now()
+        this.setState({ text : this.state.text + newLetter}, () => {
+            this.letters.push({
+                letter: newLetter,
+                time: Date.now()
+            })
+            // for when there are no letters currently on screen
+            if(this.letterEraseTimer === 0) {
+                this.setFirstLetterTimer()
+            }
         })
-        this.setState({ text : this.state.text + newLetter})
+    }
 
-        // for when there are no letters currently on screen
-        if(this.letterEraseTimer === 0) {
-            this.setFirstLetterTimer()
-        }
+    lettersArrayToStringTEMP = (): string => {
+        var s: string = ""
+        this.letters.forEach(element => {
+            s += element.letter
+        });
+        return s;
     }
 
     removeLetterFromStart = () => {
@@ -102,10 +108,11 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
 
         //TODO: add mutex so this is thread safe
         if(this.letters.length > 0 && this.state.text.length > 0) {
-            this.letters.shift()
-            this.setState({ text: this.state.text.substring(1)})
-            this.letterEraseTimer = 0
-            this.setFirstLetterTimer()
+            this.setState({ text: this.state.text.substring(1)}, () => {
+                this.letters.shift()
+                this.letterEraseTimer = 0
+                this.setFirstLetterTimer()
+            })
         }
     }
 
@@ -155,7 +162,7 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
             <div className={this.getUserTextClasses()} onClick={this.setTypeActive}>
                 <div className="userTextInnerContainer">
                     < UserNameContainer userName={this.props.userName} primaryClient={this.props.primaryClient}/>
-                    <p className="userText">{this.state.text == "" ? " " : this.state.text}</p>
+                    <p className="userText">{this.state.text === "" ? " " : this.state.text}</p>
                 </div>
                 < UserTextCursor active={this.state.active} primaryClient={this.props.primaryClient} />
                 <div className='userTextInnerInputContainer'>
