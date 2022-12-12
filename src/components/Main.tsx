@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react'
 import { ConnectionManager, ConnectionStatus, GetOrCreateConnectionManager } from '../connection/ConnectionManager';
 import { AddLetterMessage } from '../connection/message/types/AddLetter';
+import ConnectionStatusContainer from './misc/ConnectionStatusContainer';
 import UserTextContainer from './userText/UserTextContainer';
 
 type MainProps = {
@@ -57,7 +58,7 @@ class Main extends React.Component<MainProps, MainState> {
     render(){
         return (
             <div id="mainContainer">
-                <p>connection status: {this.state.connectionStatus}</p>
+                <ConnectionStatusContainer connectionStatus={this.state.connectionStatus}/>
                 <UserTextContainer userName={this.props.name} primaryClient={true}/>
                 {this.state.connectionNames.map((clientName : string) => this.getComponentForClientName(clientName))}
             </div>
