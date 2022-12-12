@@ -18,6 +18,26 @@
     width: 80%; /* Could be more or less, depending on screen size */
 }
 
+#ConnectionStatusContainer {
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-family: roboto;
+    font-size: 10pt;
+}
+
+#ConnectionStatusContainer.active {
+    background-color: rgb(71, 227, 71);
+}
+
+#ConnectionStatusContainer.connected {
+    background-color: yellow;
+}
+
+#ConnectionStatusContainer.unconnected {
+    background-color: red;
+}
+
 .userTextContainer {
     padding: 10px;
     border-bottom: 1px solid gainsboro;
