@@ -21,20 +21,36 @@
 #ConnectionStatusContainer {
     width: 100%;
     text-align: center;
-    color: white;
+    color: black;
     font-family: roboto;
     font-size: 10pt;
 }
 
-#ConnectionStatusContainer.active {
+#ConnectionStatusContainerInner {
+    width: fit-content;
+    margin: auto;
+}
+
+#ConnectionIndicator {
+    height: 0.7em;
+    width: 0.7em;
+    background-color: black;
+    float: left;
+    border-radius: 50%;
+    margin: auto;
+    margin-top: 5px;
+    margin-right: 5px;
+}
+
+#ConnectionIndicator.active {
     background-color: rgb(71, 227, 71);
 }
 
-#ConnectionStatusContainer.connected {
+#ConnectionIndicator.connected {
     background-color: yellow;
 }
 
-#ConnectionStatusContainer.unconnected {
+#ConnectionIndicator.unconnected {
     background-color: red;
 }
 
