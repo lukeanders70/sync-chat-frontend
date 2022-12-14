@@ -28,8 +28,11 @@ class ConnectionStatusContainer extends React.Component<ConnectionStatusContaine
     render() {
 
         return (
-            <div id='ConnectionStatusContainer' className={this.connectionStatusToString(this.props.connectionStatus)}>
-                {this.connectionStatusToString(this.props.connectionStatus)}
+            <div id='ConnectionStatusContainer'>
+                <div id='ConnectionStatusContainerInner'>
+                    <div id='ConnectionIndicator' className={this.connectionStatusToString(this.props.connectionStatus)}/>
+                    {this.connectionStatusToString(this.props.connectionStatus)}
+                </div>
             </div>
         )
     }
