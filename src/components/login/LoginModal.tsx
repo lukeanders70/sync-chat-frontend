@@ -13,9 +13,12 @@ function LoginModalContainer(props: LoginModalProps) {
     return (
         <div id="background">
             <div id="loginModalContainer">
-                <label htmlFor="name">Name:</label>
-                <input type="text" id="name" name="name" onChange={handleTypedNameChanged}></input>
-                <button type="button" onClick={() => {props.onSetName(typedName)}}>Submit</button> 
+                <div id="loginModalContainerInner">
+                    <h1 id="wordmark">Sync Chat</h1>
+                    <input type="text" id="usernameInputField" name="name" placeholder="Name" onChange={handleTypedNameChanged}></input>
+                    <br/>
+                    <button type="button" id="loginButton" onClick={() => {props.onSetName(typedName)}}>Submit</button> 
+                </div>
             </div>
         </div>
     )
