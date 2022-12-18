@@ -1,3 +1,4 @@
+import { hostname } from 'os';
 import React, { ReactElement } from 'react'
 import { ConnectionManager, ConnectionStatus, GetOrCreateConnectionManager } from '../connection/ConnectionManager';
 import { AddLetterMessage } from '../connection/message/types/AddLetter';
@@ -24,7 +25,20 @@ class Main extends React.Component<MainProps, MainState> {
     constructor(props: MainProps){
         super(props);
 
-        this.connectionManager = GetOrCreateConnectionManager("localhost", "8999", props.name)
+        var host: string = "";
+        switch(process.env.NODE_ENV){
+            case 'development':
+                host="localhost"
+                break;
+            case 'production':
+                host="3.88.252.157"
+                break;
+            case 'test':
+                host="localhost"
+                break;
+        }
+
+        this.connectionManager = GetOrCreateConnectionManager(host, "8999", props.name)
         this.state.connectionStatus = this.connectionManager.connectionStatus
     }
 
