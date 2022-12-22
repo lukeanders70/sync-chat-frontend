@@ -4,7 +4,7 @@ import { ConnectionManager, GetConnectionManager } from '../../connection/Connec
 import { CreateAddLetterMessage, NewLetterMessage } from '../../connection/message/types/AddLetter'
 import UserNameContainer from './UserNameContainer'
 import UserTextCursor from './UserTextCursor'
-import UserTextLetterContainer from './UserTextLetter'
+import UserTextLetterContainer, { FadeTime } from './UserTextLetter'
 
 type UserTextContainerProps = {
     primaryClient: boolean
@@ -94,27 +94,18 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
     updateLetterTimes = (elapsedTime: number) => {
         var newLetters: TimedLetter[] = []
         this.state.letters.forEach(element => {
-            newLetters.push({
-                letter: element.letter,
-                startTime: element.startTime,
-                k: element.k,
-                faded: (Date.now() - element.startTime) > LetterLifespanMs
-            })
+            const buffer = 100
+            const shouldAdd = (LetterLifespanMs + FadeTime + buffer) - (Date.now() - element.startTime) >= 0
+            if(shouldAdd) {
+                newLetters.push({
+                    letter: element.letter,
+                    startTime: element.startTime,
+                    k: element.k,
+                    faded: (Date.now() - element.startTime) > LetterLifespanMs
+                })
+            }
         });
         this.setState({letters: newLetters})
-    }
-
-    removeLetterByKey = (key: string) => {
-
-        if(this.state.letters.length > 0) {
-            let newLetters: TimedLetter[] = [];
-            this.state.letters.forEach(element => {
-                if(element.k !== key) {
-                    newLetters.push(element)
-                }
-            });
-            this.setState({ letters: newLetters})
-        }
     }
 
     setTypeActive = () => {
@@ -146,7 +137,6 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
             {this.state.letters.map((element, i) => <UserTextLetterContainer 
                 letter={element.letter}
                 isFading={element.faded}
-                removeLetter={() => {this.removeLetterByKey(element.k)}}
                 key={element.k}
             />)}
         </p> : <p> </p>
