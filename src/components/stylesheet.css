@@ -131,6 +131,21 @@
     float: right;
 }
 
+.userTextLetterSpan.fade-out {
+    -webkit-animation: fadeout .3s linear forwards;
+    animation: fadeout .3s linear forwards;
+}
+    
+@-webkit-keyframes fadeout {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+    
+@keyframes fadeout {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
 .userName {
     font-family: roboto;
     font-weight: bold;

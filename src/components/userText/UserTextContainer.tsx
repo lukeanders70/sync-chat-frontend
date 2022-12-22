@@ -1,8 +1,10 @@
-import React, { ChangeEvent } from 'react'
+import { v4 as uuid } from 'uuid';
+import React, { ChangeEvent, ReactElement } from 'react'
 import { ConnectionManager, GetConnectionManager } from '../../connection/ConnectionManager'
 import { CreateAddLetterMessage, NewLetterMessage } from '../../connection/message/types/AddLetter'
 import UserNameContainer from './UserNameContainer'
 import UserTextCursor from './UserTextCursor'
+import UserTextLetterContainer from './UserTextLetter'
 
 type UserTextContainerProps = {
     primaryClient: boolean
@@ -10,20 +12,22 @@ type UserTextContainerProps = {
 }
 
 type UserTextContainerState = {
-    text: string,
+    letters : TimedLetter[],
     active: boolean
 }
 
 type TimedLetter = {
     letter: string
-    time: EpochTimeStamp
+    startTime: EpochTimeStamp
+    faded: boolean
+    k: string // key
 }
 
 const LetterLifespanMs : number = 5000
 
 class UserTextContainer extends React.Component<UserTextContainerProps, UserTextContainerState> {
     state: UserTextContainerState = {
-        text: '',
+        letters : [],
         active: false
     }
 
@@ -31,10 +35,9 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
     connectionManager : ConnectionManager;
 
     // list of all the letters, and their arrived time
-    letters : TimedLetter[]
 
     // the current timer that is waiting to erase the last letter. Is reassigned when letter is erased
-    letterEraseTimer: number = 0
+    letterUpdateTimer: number = 0
 
     inputElement: React.RefObject<HTMLInputElement>;
 
@@ -42,17 +45,19 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
         super(props);
 
         this.connectionManager = GetConnectionManager()
-        this.letters = []
 
         this.inputElement = React.createRef();
     }
 
     componentDidMount(): void {
         this.connectionManager.messageHandler.NewLetterDelegate.AddHandler(this, this.handleNewLetter)
+        this.letterUpdateTimer = window.setInterval(() => this.updateLetterTimes(200), 200);
+        
     }
 
     componentWillUnmount(): void{
         this.connectionManager.messageHandler.NewLetterDelegate.ClearObjectHandlers(this)
+        clearInterval(this.letterUpdateTimer)
     }
 
     handleOnTextInputChange = (event : ChangeEvent<HTMLInputElement>) => {
@@ -75,60 +80,40 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
             console.error("Can only add single letters, not longer strings")
             return
         }
-        if(this.letters.length !== this.state.text.length) {
-            console.warn("Out of Sync! letters array and text state should be the same size")
-            return
-        }
 
-        this.setState({ text : this.state.text + newLetter}, () => {
-            this.letters.push({
-                letter: newLetter,
-                time: Date.now()
-            })
-            // for when there are no letters currently on screen
-            if(this.letterEraseTimer === 0) {
-                this.setFirstLetterTimer()
-            }
+        const newLetters = [...this.state.letters];
+        newLetters.push({
+            letter: newLetter,
+            startTime: Date.now(),
+            faded: false,
+            k: uuid()
         })
+        this.setState({ letters : newLetters})
     }
 
-    lettersArrayToStringTEMP = (): string => {
-        var s: string = ""
-        this.letters.forEach(element => {
-            s += element.letter
-        });
-        return s;
-    }
-
-    removeLetterFromStart = () => {
-        if(this.letters.length !== this.state.text.length) {
-            console.warn("Out of Sync! letters array and text state should be the same size")
-            return
-        }
-
-        //TODO: add mutex so this is thread safe
-        if(this.letters.length > 0 && this.state.text.length > 0) {
-            this.setState({ text: this.state.text.substring(1)}, () => {
-                this.letters.shift()
-                this.letterEraseTimer = 0
-                this.setFirstLetterTimer()
+    updateLetterTimes = (elapsedTime: number) => {
+        var newLetters: TimedLetter[] = []
+        this.state.letters.forEach(element => {
+            newLetters.push({
+                letter: element.letter,
+                startTime: element.startTime,
+                k: element.k,
+                faded: (Date.now() - element.startTime) > LetterLifespanMs
             })
-        }
+        });
+        this.setState({letters: newLetters})
     }
 
-    setFirstLetterTimer = () => {
-        if(this.letterEraseTimer !== 0) {
-            console.warn("tried to set a letter time, but one is already active")
-            return
-        }
-        if(this.letters.length > 0) {
-            const firstLetter : TimedLetter = this.letters[0]
-            const timeToWait = LetterLifespanMs - (Date.now() - firstLetter.time)
-            if(timeToWait < 10) { // selecting 10 so we don't have a lot of really short timers
-                this.removeLetterFromStart()
-            }  else {
-                this.letterEraseTimer = window.setTimeout(this.removeLetterFromStart, timeToWait)
-            }
+    removeLetterByKey = (key: string) => {
+
+        if(this.state.letters.length > 0) {
+            let newLetters: TimedLetter[] = [];
+            this.state.letters.forEach(element => {
+                if(element.k !== key) {
+                    newLetters.push(element)
+                }
+            });
+            this.setState({ letters: newLetters})
         }
     }
 
@@ -156,13 +141,24 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
         return userTextContainerClasses
     }
 
+    getInnerText = () : ReactElement => {
+        return this.state.letters.length > 0 ? <p className="userText">
+            {this.state.letters.map((element, i) => <UserTextLetterContainer 
+                letter={element.letter}
+                isFading={element.faded}
+                removeLetter={() => {this.removeLetterByKey(element.k)}}
+                key={element.k}
+            />)}
+        </p> : <p> </p>
+    }
+
     render() {
 
         return (
             <div className={this.getUserTextClasses()} onClick={this.setTypeActive}>
                 <div className="userTextInnerContainer">
                     < UserNameContainer userName={this.props.userName} primaryClient={this.props.primaryClient}/>
-                    <p className="userText">{this.state.text === "" ? " " : this.state.text}</p>
+                    {this.getInnerText()}
                 </div>
                 < UserTextCursor active={this.state.active} primaryClient={this.props.primaryClient} />
                 <div className='userTextInnerInputContainer'>
