@@ -140,7 +140,7 @@
     0% { opacity: 1; }
     100% { opacity: 0; }
 }
-    
+
 @keyframes fadeout {
     0% { opacity: 1; }
     100% { opacity: 0; }
