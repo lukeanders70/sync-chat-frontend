@@ -31,6 +31,8 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
         active: false
     }
 
+    currentLetters: TimedLetter[] = [];
+
     // pointer to the global connection manager
     connectionManager : ConnectionManager;
 
@@ -81,19 +83,18 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
             return
         }
 
-        const newLetters = [...this.state.letters];
-        newLetters.push({
+        this.currentLetters.push({
             letter: newLetter,
             startTime: Date.now(),
             faded: false,
             k: uuid()
         })
-        this.setState({ letters : newLetters})
+        this.setState({ letters : this.currentLetters})
     }
 
     updateLetterTimes = (elapsedTime: number) => {
         var newLetters: TimedLetter[] = []
-        this.state.letters.forEach(element => {
+        this.currentLetters.forEach(element => {
             const buffer = 100
             const shouldAdd = (LetterLifespanMs + FadeTime + buffer) - (Date.now() - element.startTime) >= 0
             if(shouldAdd) {
@@ -105,7 +106,8 @@ class UserTextContainer extends React.Component<UserTextContainerProps, UserText
                 })
             }
         });
-        this.setState({letters: newLetters})
+        this.currentLetters = newLetters;
+        this.setState({letters: this.currentLetters})
     }
 
     setTypeActive = () => {
