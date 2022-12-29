@@ -73,6 +73,11 @@ export class MessageHandler {
             }
             case("new-letter") : {
                 this.NewLetterDelegate.Handle(messageString)
+                break;
+            }
+            default : {
+                console.error("unknown message type")
+                break;
             }
         }
     }
