@@ -65,7 +65,8 @@ export class ConnectionManager
     }
 
     private HandleError(event: Event) {
-        console.error("Error on websocket " + event)
+        console.error("Error on websocket")
+        console.error(event)
     }
 
     private HandleClose(event: CloseEvent) {
